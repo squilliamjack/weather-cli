@@ -1,6 +1,9 @@
 import requests
-url = "https://api.openweathermap.org/data/2.5/weather"
+import json
+import os
+from datetime import datetime
 
+url = "https://api.openweathermap.org/data/2.5/weather"
 
 def get_weather(city):
     
@@ -17,7 +20,6 @@ def get_weather(city):
         return None
     return data
 
-
 def display_weather(city, data):
 
     temp = data["main"]["temp"]
@@ -32,6 +34,31 @@ def display_weather(city, data):
     print(f"  Humidity    : {humidity}%")
     print("---------------------------")
 
+def save_result(city, data):
+    tempSave = data["main"]["temp"]
+    descriptionSave = data["weather"][0]["description"]
+    humiditySave = data["main"]["humidity"]
+    timeStamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    entry = {
+        "city" : city,
+        "temperature" : tempSave,
+        "conditions" : descriptionSave,
+        "humidity" : humiditySave,
+        "timestamp" : timeStamp
+    }
+
+    if os.path.exists("weather_log.json"):
+        with open("weather_log.json", "r") as f:
+            log = json.load(f)
+    else:
+        log = []
+
+    log.append(entry)
+
+    with open("weather_log.json", "w") as f:
+        json.dump(log, f, indent=4)
+
 
 while True:
     try:
@@ -43,6 +70,7 @@ while True:
             print("------------------------------------------------------------------------")
         else: 
             display_weather(city, data)
+            save_result(city, data)
             break
 
     except requests.exceptions.RequestException:
