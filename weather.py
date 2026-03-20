@@ -1,15 +1,27 @@
+"""
+Weather CLI Tool
+Fetches current weather data for any city using the OpenWeatherMap API.
+Displays temperature, conditions, and humidity.
+Logs each lookup to weather_log.json.
+"""
+
 import requests
 import json
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 url = "https://api.openweathermap.org/data/2.5/weather"
 
 def get_weather(city):
-    
+    """Calls the OpenWeatherMap API and returns weather data for the given city."""
     params = {
         "q" : city,
-        "appid" : "cc5bd20949827335b8ae8b38710f0881",
+        "appid" : API_KEY,
         "units" : "imperial"
     }
 
@@ -21,7 +33,7 @@ def get_weather(city):
     return data
 
 def display_weather(city, data):
-
+    """Takes city input and calls temp, description and humidity with clean output styling."""
     temp = data["main"]["temp"]
     description = data["weather"][0]["description"]
     humidity = data["main"]["humidity"]
@@ -35,16 +47,17 @@ def display_weather(city, data):
     print("---------------------------")
 
 def save_result(city, data):
-    tempSave = data["main"]["temp"]
-    descriptionSave = data["weather"][0]["description"]
-    humiditySave = data["main"]["humidity"]
+    """Stores each output in JSON file weather_log.json"""
+    temp = data["main"]["temp"]
+    description = data["weather"][0]["description"]
+    humidity = data["main"]["humidity"]
     timeStamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     entry = {
         "city" : city,
-        "temperature" : tempSave,
-        "conditions" : descriptionSave,
-        "humidity" : humiditySave,
+        "temperature" : temp,
+        "conditions" : description,
+        "humidity" : humidity,
         "timestamp" : timeStamp
     }
 
@@ -66,7 +79,7 @@ while True:
         data = get_weather(city)
         
         if data is None:
-            print(f"'{city}' not ofund. please check your spelling and try again.")
+            print(f"'{city}' not found. please check your spelling and try again.")
             print("------------------------------------------------------------------------")
         else: 
             display_weather(city, data)
